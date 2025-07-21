@@ -184,14 +184,15 @@ module PE_tb();
 	initial begin
         @(negedge configure)
         for (k = 0; k < (LAYER_p * LAYER_n * LAYER_F) / 4; k = k + 1) begin
-            while (ipsum_fifo_full) begin wait_cycles(1); end
+            wait(!ipsum_fifo_full)
+            // wait(DUT.ipsum_fifo_inst.empty_flag);
+            wait_cycles(1);
             ipsum = ipsum_mem[k];
             push_ipsum  = 1'b1;
             wait_cycles(1);
             push_ipsum = 1'b0;
             ipsum = 0;
-            while (DUT.ipsum_fifo_empty) begin wait_cycles(1); end
-            wait_cycles(100); 
+            wait_cycles(1); 
         end
     end
 
@@ -200,6 +201,7 @@ module PE_tb();
 		@(negedge configure)
 		for (m = 0; m < (LAYER_p * LAYER_n * LAYER_F) / 4; m = m + 1) begin
             wait(!opsum_fifo_empty);
+            // wait(DUT.opsum_fifo_inst.full_flag);
             wait_cycles(1);
             pop_opsum = 1'b1;
             if (opsum == expected_output[m]) begin
@@ -209,7 +211,7 @@ module PE_tb();
             end
             wait_cycles(1);
             pop_opsum = 1'b0;
-            wait_cycles(100);
+            wait_cycles(1);
         end
         $stop;
 	end
