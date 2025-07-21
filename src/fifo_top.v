@@ -37,7 +37,7 @@ module fifo_top #(
     assign almost_empty_flag = (count <= ALMOST_THRESH);
     assign almost_full_flag  = (count >= FIFO_DEPTH - ALMOST_THRESH);
     
-    counter #(
+    up_down_counter #(
         .WIDTH(ADDR_WIDTH + 1),
         .INC_STEP(INC_STEP),
         .DEC_STEP(DEC_STEP)

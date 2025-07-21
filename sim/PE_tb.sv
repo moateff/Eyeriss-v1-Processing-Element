@@ -35,13 +35,13 @@ module PE_tb();
     localparam FILTER_MEM_SIZE = (p_MAX * q_MAX * S_MAX) / 4;
     localparam PSUM_MEM_SIZE   = (p_MAX * n_MAX * F_MAX) / 4;
     
-    parameter LAYER_W = 227;
-    parameter LAYER_S = 11;
-    parameter LAYER_F = 55; 
-    parameter LAYER_U = 4;
-	parameter LAYER_n = 1;
+    parameter LAYER_W = 15;
+    parameter LAYER_S = 3;
+    parameter LAYER_F = 13; 
+    parameter LAYER_U = 1;
+	parameter LAYER_n = 4;
     parameter LAYER_p = 16;
-    parameter LAYER_q = 1;
+    parameter LAYER_q = 3;
   
     reg  clk;
     reg  reset;
@@ -130,98 +130,93 @@ module PE_tb();
         .opsum(opsum),
         .opsum_fifo_empty(opsum_fifo_empty)
     );
-	
-    // Load input data
+    
     initial begin
+        // Load input data
         $readmemb("ifmap_data.mem", ifmap_mem);
         $readmemb("filter_data.mem", filter_mem);
-		$readmemb("ipsum_data.mem", ipsum_mem);
+        $readmemb("ipsum_data.mem", ipsum_mem);
         $readmemb("expected_output.mem", expected_output);
-    end
     
-	//testing
-    initial begin
-		intialize_tb;
-        wait_cycles(1);
-		enable_pe;
-        assert_reset;
-        wait_cycles(1);
+		intialize_DUT();
+        assert_reset();
         cfg(LAYER_S, LAYER_F, LAYER_U, LAYER_n, LAYER_p, LAYER_q);
-	end
-	
-    integer i;
-	initial begin
-		@(negedge configure)
-		for (i = 0; i < LAYER_n * LAYER_W * LAYER_q; i = i + 1) begin
-			while (ifmap_fifo_full) begin wait_cycles(1); end
-			ifmap = ifmap_mem[i];
-			push_ifmap = 1;
-			wait_cycles(1);
-			push_ifmap = 0;
-			ifmap = 0;
-			wait_cycles(1); 
-		end
-	end
-    
-    
-	integer j;
-    initial begin
-        @(negedge configure);
-        for (j = 0; j < (LAYER_p * LAYER_q * LAYER_S) / 4;j = j + 1) begin
-            while (filter_fifo_full) begin wait_cycles(1); end 
-            filter = filter_mem[j];
-            push_filter = 1;
-            wait_cycles(1);
-            push_filter = 0;
-            filter = 0;
-            wait_cycles(1);
-        end
-    end
-    
-	
-	integer k;
-	initial begin
-        @(negedge configure)
-        for (k = 0; k < (LAYER_p * LAYER_n * LAYER_F) / 4; k = k + 1) begin
-            wait(!ipsum_fifo_full)
-            // wait(DUT.ipsum_fifo_inst.empty_flag);
-            wait_cycles(1);
-            ipsum = ipsum_mem[k];
-            push_ipsum  = 1'b1;
-            wait_cycles(1);
-            push_ipsum = 1'b0;
-            ipsum = 0;
-            wait_cycles(1); 
-        end
-    end
-
-	integer	m;
-	initial begin
-		@(negedge configure)
-		for (m = 0; m < (LAYER_p * LAYER_n * LAYER_F) / 4; m = m + 1) begin
-            wait(!opsum_fifo_empty);
-            // wait(DUT.opsum_fifo_inst.full_flag);
-            wait_cycles(1);
-            pop_opsum = 1'b1;
-            if (opsum == expected_output[m]) begin
-                $display("Correct reading at index %0d: Expected %h, Got %h at time = %0t", m, expected_output[m], opsum, $time);
-            end else begin
-                $display("Mismatch at index %0d: Expected %h, Got %h at time = %0t", m, expected_output[m], opsum, $time);
-            end
-            wait_cycles(1);
-            pop_opsum = 1'b0;
-            wait_cycles(1);
-        end
+        
+        fork
+            push_ifmap_data();
+            push_filter_data();
+            push_ipsum_data();
+            check_opsum_data();
+        join
         $stop;
 	end
 	
-	task intialize_tb;
+    task automatic push_ifmap_data;
+        begin
+            for (int i = 0; i < LAYER_n * LAYER_W * LAYER_q; i = i + 1) begin
+                wait(!ifmap_fifo_full);
+                wait_cycles(1);
+                ifmap = ifmap_mem[i];
+                push_ifmap = 1;
+                wait_cycles(1);
+                push_ifmap = 0;
+                ifmap = 0;
+            end
+        end
+    endtask
+
+    task automatic push_filter_data;
+        begin
+            for (int j = 0; j < (LAYER_p * LAYER_q * LAYER_S) / 4; j = j + 1) begin
+                wait(!filter_fifo_full); 
+                wait_cycles(1);
+                filter = filter_mem[j];
+                push_filter = 1;
+                wait_cycles(1);
+                push_filter = 0;
+                filter = 0;
+            end
+        end
+    endtask
+
+    task automatic push_ipsum_data;
+        begin
+            for (int k = 0; k < (LAYER_p * LAYER_n * LAYER_F) / 4; k = k + 1) begin
+                wait(!ipsum_fifo_full);
+                wait_cycles(1);
+                ipsum = ipsum_mem[k];
+                push_ipsum = 1'b1;
+                wait_cycles(1);
+                push_ipsum = 1'b0;
+                ipsum = 0;
+            end
+        end
+    endtask
+
+    task automatic check_opsum_data;
+        begin
+            for (int m = 0; m < (LAYER_p * LAYER_n * LAYER_F) / 4; m = m + 1) begin
+                wait(!opsum_fifo_empty);
+                wait_cycles(1);
+                pop_opsum = 1'b1;
+                if (opsum == expected_output[m]) begin
+                    $display("Correct reading at index %0d: Expected %h, Got %h at time = %0t", m, expected_output[m], opsum, $time);
+                end else begin
+                    $display("Mismatch at index %0d: Expected %h, Got %h at time = %0t", m, expected_output[m], opsum, $time);
+                end
+                wait_cycles(1);
+                pop_opsum = 1'b0;
+            end
+        end
+    endtask
+
+	
+	task intialize_DUT;
 		begin
-            clk       = 1'b0;
-            reset     = 1'b0;
-            enable    = 1'b0;
-            configure = 1'b0;
-               
+            clk         = 1'b0;
+            reset       = 1'b0;
+            enable      = 1'b1;
+            configure   = 1'b0;
             push_ifmap  = 1'b0;
             push_filter = 1'b0;
             push_ipsum  = 1'b0;
@@ -236,14 +231,9 @@ module PE_tb();
         end
     endtask
 	
-	task enable_pe;
-        begin
-            enable = 1'b1; 
-        end
-    endtask
-	
 	task assert_reset;
         begin
+            wait_cycles(1); 
             reset = 1'b1;
             wait_cycles(1);      
             reset = 1'b0; 
@@ -258,23 +248,12 @@ module PE_tb();
         input [p_WIDTH - 1:0] cfg_p;
         input [q_WIDTH - 1:0] cfg_q;        
         begin
-            S = cfg_S;
-            F = cfg_F;
-            U = cfg_U;
-            n = cfg_n;  
-            p = cfg_p; 
-            q = cfg_q;
-              
+            S = cfg_S; F = cfg_F; U = cfg_U; n = cfg_n; p = cfg_p; q = cfg_q;
+            wait_cycles(1);
             configure = 1'b1; 
             wait_cycles(1);      
             configure = 1'b0;
-            
-            S = 0;
-            F = 0;
-            U = 0;
-            n = 0;  
-            p = 0; 
-            q = 0; 
+            S = 0; F = 0; U = 0; n = 0; p = 0; q = 0; 
         end
     endtask
 	

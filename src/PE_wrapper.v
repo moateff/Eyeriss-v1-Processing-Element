@@ -125,7 +125,7 @@ module PE_wrapper
         .empty_flag(ifmap_fifo_empty)
     );
     
-    fifo_top #(
+    fifo_wrapper #(
         .R_DATA_WIDTH(DATA_WIDTH),
         .W_DATA_WIDTH(DATA_WIDTH_FILTER),
         .FIFO_DEPTH(FILTER_FIFO_DEPTH)

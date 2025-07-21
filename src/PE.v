@@ -185,7 +185,7 @@ module PE
         .clk(clk),
         .reset(reset | reset_filter_spad),
         
-        .spad_depth({filter_spad_depth[FILTER_ADDR_WIDTH - 1:2], 2'b00}),
+        .spad_depth(filter_spad_depth[FILTER_ADDR_WIDTH - 1:0]),
         
         .w_en(wr_filter),
         .din(filter_pixel),
