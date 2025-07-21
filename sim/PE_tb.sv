@@ -1,6 +1,9 @@
 `timescale 1ns / 1ps
 
 module PE_tb();
+    int error_count = 0;
+    int pass_count  = 0;
+
     parameter CLK_PERIOD = 10;
     parameter DATA_WIDTH = 16;
 	
@@ -23,13 +26,13 @@ module PE_tb();
     parameter FILTER_SPAD_DEPTH = 224;
     parameter PSUM_SPAD_DEPTH   = 24;
     
-    parameter W_MAX = 227;
-    parameter S_MAX = 11;
-    parameter F_MAX = 55; 
-    parameter U_MAX = 4;
-	parameter n_MAX = 4;
-    parameter p_MAX = 16;
-    parameter q_MAX = 4;
+    localparam W_MAX = 227;
+    localparam S_MAX = 11;
+    localparam F_MAX = 55; 
+    localparam U_MAX = 4;
+	localparam n_MAX = 4;
+    localparam p_MAX = 16;
+    localparam q_MAX = 4;
     
     localparam IFMAP_MEM_SIZE  = n_MAX * W_MAX * q_MAX;
     localparam FILTER_MEM_SIZE = (p_MAX * q_MAX * S_MAX) / 4;
@@ -148,6 +151,10 @@ module PE_tb();
             push_ipsum_data();
             check_opsum_data();
         join
+        
+        $display("--------- Summary ---------");
+        $display("Total Matching: %0d/%0d", pass_count, (LAYER_p * LAYER_n * LAYER_F) / 4);
+        $display("Total Mismatching: %0d/%0d", error_count, (LAYER_p * LAYER_n * LAYER_F) / 4);
         $stop;
 	end
 	
@@ -199,16 +206,21 @@ module PE_tb();
                 wait(!opsum_fifo_empty);
                 wait_cycles(1);
                 pop_opsum = 1'b1;
+                
                 if (opsum == expected_output[m]) begin
-                    $display("Correct reading at index %0d: Expected %h, Got %h at time = %0t", m, expected_output[m], opsum, $time);
+                    pass_count++;
+                    $display("Correct at index %0d: Expected %h, Got %h at time = %0t", m, expected_output[m], opsum, $time);
                 end else begin
+                    error_count++;
                     $display("Mismatch at index %0d: Expected %h, Got %h at time = %0t", m, expected_output[m], opsum, $time);
                 end
+                
                 wait_cycles(1);
                 pop_opsum = 1'b0;
             end
         end
     endtask
+
 
 	
 	task intialize_DUT;
