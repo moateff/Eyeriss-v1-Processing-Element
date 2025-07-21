@@ -25,9 +25,9 @@ module cla #(
 )(
     input  wire [width - 1 : 0] x,
     input  wire [width - 1 : 0] y,
-    output wire [width - 1 : 0] sum,
-    output wire cout,                    // Carry-out for unsigned addition
-    output wire overflow                 // Overflow flag for signed numbers
+    output wire [width - 1 : 0] sum
+//    output wire cout,                    // Carry-out for unsigned addition
+//    output wire overflow                 // Overflow flag for signed numbers
 );
 
     /*============== Carry generation ============== */
@@ -46,11 +46,11 @@ module cla #(
         end
     endgenerate
 
-    assign cout = c[width];
+//    assign cout = c[width];
     assign sum  = p ^ c[width - 1 : 0];
 
     /*============== Overflow Detection ==============*/
-    assign overflow = (x[width-1] & y[width-1] & ~sum[width-1]) | 
-                      (~x[width-1] & ~y[width-1] & sum[width-1]);
+//    assign overflow = (x[width-1] & y[width-1] & ~sum[width-1]) | 
+//                      (~x[width-1] & ~y[width-1] & sum[width-1]);
 
 endmodule

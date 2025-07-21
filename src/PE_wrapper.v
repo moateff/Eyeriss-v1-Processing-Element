@@ -19,19 +19,20 @@
 // 
 //////////////////////////////////////////////////////////////////////////////////
 
+(* KEEP_HIERARCHY = "yes" *)
 module PE_wrapper
 #(   
     parameter DATA_WIDTH_IFMAP  = 16,
     parameter DATA_WIDTH_FILTER = 64,
     parameter DATA_WIDTH_PSUM   = 64,
     
-    parameter IFMAP_FIFO_DEPTH  = 4,
+    parameter IFMAP_FIFO_DEPTH  = 8,
     parameter FILTER_FIFO_DEPTH = 8,
     parameter PSUM_FIFO_DEPTH   = 8,
     
     parameter DATA_WIDTH = 16,
         
-    parameter S_WIDTH = 4,
+    parameter S_WIDTH = 5,
     parameter F_WIDTH = 6,
     parameter U_WIDTH = 3,
     parameter n_WIDTH = 3,

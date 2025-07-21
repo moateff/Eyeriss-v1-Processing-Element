@@ -25,7 +25,7 @@ module PE
 #(
     parameter DATA_WIDTH = 16,
     
-    parameter S_WIDTH = 4,
+    parameter S_WIDTH = 5,
     parameter F_WIDTH = 6,
     parameter U_WIDTH = 3,
     parameter n_WIDTH = 3,
@@ -270,7 +270,7 @@ module PE
     assign mul_in2 = filter_from_spad;
     assign en_mul = (~zero_flag) & (rd_data);
     
-    signed_seq_mul #(.DATA_WIDTH(DATA_WIDTH)) multiplier_inst (
+    signed_seq_mul #(.PIXEL_WIDTH(DATA_WIDTH)) multiplier_inst (
         .clk(clk),
         .reset(reset), 
         .enable(en_mul_r),
