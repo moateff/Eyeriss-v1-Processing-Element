@@ -1,4 +1,4 @@
-module rd_ctrl #(
+module fifo_rd_ctrl #(
     parameter R_DATA_WIDTH = 16,
     parameter W_DATA_WIDTH = 16,
     parameter MEM_WIDTH    = 16,

@@ -64,7 +64,7 @@ module fifo_wrapper#(
     
     generate
         if (WRITE_LIMIT > 0) begin 
-            fifo_counter #(.WIDTH(WRITE_LIMIT)) write_enable_logic (
+            fifo_flag_generator #(.WIDTH(WRITE_LIMIT)) write_enable_logic (
                 .clk(clk),
                 .reset(reset),
                 .enable(write_request),
@@ -78,7 +78,7 @@ module fifo_wrapper#(
     
     generate
         if (READ_LIMIT > 0) begin 
-            fifo_counter #(.WIDTH(READ_LIMIT)) read_enable_logic (
+            fifo_flag_generator #(.WIDTH(READ_LIMIT)) read_enable_logic (
                 .clk(clk),
                 .reset(reset),
                 .enable(read_request),

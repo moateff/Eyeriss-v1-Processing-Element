@@ -1,4 +1,4 @@
-module fifo_memory #(
+module fifo_mem #(
     parameter R_DATA_WIDTH = 64,
     parameter W_DATA_WIDTH = 16,
     parameter MEM_WIDTH    = 16,

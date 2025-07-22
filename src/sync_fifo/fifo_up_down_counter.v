@@ -1,4 +1,4 @@
-module up_down_counter #(
+module fifo_up_down_counter #(
     parameter WIDTH    = 4,             
     parameter INC_STEP = 1,            
     parameter DEC_STEP = 1            

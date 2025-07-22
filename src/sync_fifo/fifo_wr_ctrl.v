@@ -1,4 +1,4 @@
-module wr_ctrl #(
+module fifo_wr_ctrl #(
     parameter R_DATA_WIDTH = 8,
     parameter W_DATA_WIDTH = 16, 
     parameter MEM_WIDTH    = 16,

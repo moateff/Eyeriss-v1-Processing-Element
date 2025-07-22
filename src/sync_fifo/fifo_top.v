@@ -37,7 +37,7 @@ module fifo_top #(
     assign almost_empty_flag = (count <= ALMOST_THRESH);
     assign almost_full_flag  = (count >= FIFO_DEPTH - ALMOST_THRESH);
     
-    up_down_counter #(
+    fifo_up_down_counter #(
         .WIDTH(ADDR_WIDTH + 1),
         .INC_STEP(INC_STEP),
         .DEC_STEP(DEC_STEP)
@@ -49,7 +49,7 @@ module fifo_top #(
         .count(count)
     );
         
-    rd_ctrl #(
+    fifo_rd_ctrl #(
         .R_DATA_WIDTH(R_DATA_WIDTH),
         .W_DATA_WIDTH(W_DATA_WIDTH),
         .MEM_WIDTH(MEM_WIDTH),
@@ -67,7 +67,7 @@ module fifo_top #(
         .empty_flag(empty_flag)
     );
 
-    wr_ctrl #(
+    fifo_wr_ctrl #(
         .R_DATA_WIDTH(R_DATA_WIDTH),
         .W_DATA_WIDTH(W_DATA_WIDTH),
         .MEM_WIDTH(MEM_WIDTH),
@@ -85,7 +85,7 @@ module fifo_top #(
         .full_flag(full_flag)
     );
 
-    fifo_memory #(
+    fifo_mem #(
         .R_DATA_WIDTH(R_DATA_WIDTH),
         .W_DATA_WIDTH(W_DATA_WIDTH),        
         .MEM_WIDTH(MEM_WIDTH),

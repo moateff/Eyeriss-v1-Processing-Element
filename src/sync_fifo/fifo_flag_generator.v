@@ -20,7 +20,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module fifo_counter #(
+module fifo_flag_generator #(
     parameter WIDTH = 8             // Width of counter
 )(
     input wire clk,                 // Clock
