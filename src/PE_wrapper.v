@@ -159,7 +159,7 @@ module PE_wrapper
         // .almost_full_flag(),
         .almost_empty_flag(ipsum_fifo_empty),
         .full_flag(ipsum_fifo_full)
-        // .empty_flag(ipsum_fifo_empty)
+        // .empty_flag()
     );
     
     fifo_top #(
@@ -175,7 +175,7 @@ module PE_wrapper
         .rd_data(opsum),
         .almost_full_flag(opsum_fifo_full),
         // .almost_empty_flag(),
-        // .full_flag(opsum_fifo_full),
+        // .full_flag(),
         .empty_flag(opsum_fifo_empty)
     );
     
