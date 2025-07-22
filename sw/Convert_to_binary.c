@@ -3,6 +3,7 @@
 #include <string.h>
 
 #define MAX_LINE_LENGTH 100 
+#define PAD_STRING "0000000000000000"
 
 void ConvertFilesToBinaryAndConcatenate(const char* filters_filename, const char* ifmaps_filename, const char* baises_filename, const char* ofmaps_filename);    void intToBinary16bit(int num, char* binaryStr);
 void readAndWriteBinary(const char* inputFilename, const char* outputFilename);
@@ -84,6 +85,14 @@ void concatenateLines(const char* inputFile, const char* outputFile) {
             fprintf(outputFilePtr, "%s_%s_%s_%s\n", lines[3], lines[2], lines[1], lines[0]);
             lineCount = 0; // Reset counter
         }
+    }
+
+    // Handle remaining lines with zero-padding
+    if (lineCount > 0) {
+        for (int i = lineCount; i < 4; ++i) {
+            strcpy(lines[i], PAD_STRING);
+        }
+        fprintf(outputFilePtr, "%s_%s_%s_%s\n", lines[3], lines[2], lines[1], lines[0]);
     }
 
     fclose(inputFilePtr);

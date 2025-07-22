@@ -19,7 +19,7 @@
 // 
 //////////////////////////////////////////////////////////////////////////////////
 
-(* KEEP_HIERARCHY = "yes" *)
+
 module PE_wrapper
 #(   
     parameter DATA_WIDTH_IFMAP  = 16,
@@ -32,6 +32,7 @@ module PE_wrapper
     
     parameter DATA_WIDTH = 16,
         
+    parameter W_WIDTH = 8,
     parameter S_WIDTH = 5,
     parameter F_WIDTH = 6,
     parameter U_WIDTH = 3,
@@ -53,6 +54,7 @@ module PE_wrapper
     output busy,
     
     // Configurations
+    input [W_WIDTH - 1:0] W,    
     input [S_WIDTH - 1:0] S,    
     input [F_WIDTH - 1:0] F,
     input [U_WIDTH - 1:0] U,
@@ -119,8 +121,9 @@ module PE_wrapper
         .write_request(push_ifmap),
         .read_request(pop_ifmap),
         .wr_data(ifmap),
-        
         .rd_data(ifmap_from_fifo),
+        // .almost_full_flag(),
+        // .almost_empty_flag(),
         .full_flag(ifmap_fifo_full),
         .empty_flag(ifmap_fifo_empty)
     );
@@ -135,8 +138,9 @@ module PE_wrapper
         .write_request(push_filter),
         .read_request(pop_filter),
         .wr_data(filter),
-        
         .rd_data(filter_from_fifo),
+        // .almost_full_flag(),
+        // .almost_empty_flag(),
         .full_flag(filter_fifo_full),
         .empty_flag(filter_fifo_empty)
     );
@@ -151,10 +155,11 @@ module PE_wrapper
         .write_request(push_ipsum),
         .read_request(pop_ipsum),
         .wr_data(ipsum),
-        
         .rd_data(ipsum_from_fifo),
-        .full_flag(ipsum_fifo_full),
-        .almost_empty_flag(ipsum_fifo_empty)
+        // .almost_full_flag(),
+        .almost_empty_flag(ipsum_fifo_empty),
+        .full_flag(ipsum_fifo_full)
+        // .empty_flag(ipsum_fifo_empty)
     );
     
     fifo_top #(
@@ -167,18 +172,20 @@ module PE_wrapper
         .write_request(push_opsum),
         .read_request(pop_opsum),
         .wr_data(opsum_to_fifo),
-        
         .rd_data(opsum),
         .almost_full_flag(opsum_fifo_full),
+        // .almost_empty_flag(),
+        // .full_flag(opsum_fifo_full),
         .empty_flag(opsum_fifo_empty)
     );
     
     PE #(
         .DATA_WIDTH(DATA_WIDTH),
         
-        .U_WIDTH(U_WIDTH),
+        .W_WIDTH(W_WIDTH),
         .S_WIDTH(S_WIDTH),
         .F_WIDTH(F_WIDTH),
+        .U_WIDTH(U_WIDTH),
         .n_WIDTH(n_WIDTH),
         .p_WIDTH(p_WIDTH),
         .q_WIDTH(q_WIDTH),
@@ -192,9 +199,10 @@ module PE_wrapper
         .busy(busy),
         .configure(configure),
         
-        .U(U),
+        .W(W),
         .S(S),
         .F(F),
+        .U(U),
         .n(n),
         .p(p),
         .q(q),    

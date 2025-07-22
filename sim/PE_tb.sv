@@ -15,6 +15,7 @@ module PE_tb();
     parameter FILTER_FIFO_DEPTH = 8;
     parameter PSUM_FIFO_DEPTH   = 8;
     
+    parameter W_WIDTH = 8;    
     parameter S_WIDTH = 5;    
     parameter F_WIDTH = 6;
     parameter U_WIDTH = 3;
@@ -35,16 +36,16 @@ module PE_tb();
     localparam q_MAX = 4;
     
     localparam IFMAP_MEM_SIZE  = n_MAX * W_MAX * q_MAX;
-    localparam FILTER_MEM_SIZE = (p_MAX * q_MAX * S_MAX) / 4;
-    localparam PSUM_MEM_SIZE   = (p_MAX * n_MAX * F_MAX) / 4;
+    localparam FILTER_MEM_SIZE = (p_MAX * q_MAX * S_MAX + 3) / 4;
+    localparam PSUM_MEM_SIZE   = (p_MAX * n_MAX * F_MAX + 3) / 4;
     
-    parameter LAYER_W = 15;
-    parameter LAYER_S = 3;
-    parameter LAYER_F = 13; 
-    parameter LAYER_U = 1;
-	parameter LAYER_n = 4;
+    parameter LAYER_W = 227;
+    parameter LAYER_S = 11;
+    parameter LAYER_F = 55; 
+    parameter LAYER_U = 4;
+	parameter LAYER_n = 1;
     parameter LAYER_p = 16;
-    parameter LAYER_q = 3;
+    parameter LAYER_q = 1;
   
     reg  clk;
     reg  reset;
@@ -52,6 +53,7 @@ module PE_tb();
     reg  configure;
     wire busy;
 	
+    reg [W_WIDTH - 1:0] W;    
     reg [S_WIDTH - 1:0] S;    
     reg [F_WIDTH - 1:0] F;
     reg [U_WIDTH - 1:0] U;
@@ -92,9 +94,10 @@ module PE_tb();
         .FILTER_FIFO_DEPTH(FILTER_FIFO_DEPTH),
         .PSUM_FIFO_DEPTH(PSUM_FIFO_DEPTH),
         
-        .U_WIDTH(U_WIDTH),
+        .W_WIDTH(W_WIDTH),
         .S_WIDTH(S_WIDTH),
         .F_WIDTH(F_WIDTH),
+        .U_WIDTH(U_WIDTH),
         .n_WIDTH(n_WIDTH),
         .p_WIDTH(p_WIDTH),
         .q_WIDTH(q_WIDTH),
@@ -110,6 +113,7 @@ module PE_tb();
         .configure(configure),
         .busy(busy),
            
+        .W(W),
         .S(S),
         .F(F),
         .U(U),
@@ -143,7 +147,7 @@ module PE_tb();
     
 		intialize_DUT();
         assert_reset();
-        cfg(LAYER_S, LAYER_F, LAYER_U, LAYER_n, LAYER_p, LAYER_q);
+        cfg(LAYER_W, LAYER_S, LAYER_F, LAYER_U, LAYER_n, LAYER_p, LAYER_q);
         
         fork
             push_ifmap_data();
@@ -152,9 +156,9 @@ module PE_tb();
             check_opsum_data();
         join
         
-        $display("--------- Summary ---------");
-        $display("Total Matching: %0d/%0d", pass_count, (LAYER_p * LAYER_n * LAYER_F) / 4);
-        $display("Total Mismatching: %0d/%0d", error_count, (LAYER_p * LAYER_n * LAYER_F) / 4);
+        $display("--------------------------------- Summary ---------------------------------");
+        $display("Total Match: %0d/%0d", pass_count, (LAYER_p * LAYER_n * LAYER_F + 3) / 4);
+        $display("Total Mismatch: %0d/%0d", error_count, (LAYER_p * LAYER_n * LAYER_F + 3) / 4);
         $stop;
 	end
 	
@@ -174,7 +178,7 @@ module PE_tb();
 
     task automatic push_filter_data;
         begin
-            for (int j = 0; j < (LAYER_p * LAYER_q * LAYER_S) / 4; j = j + 1) begin
+            for (int j = 0; j < (LAYER_p * LAYER_q * LAYER_S + 3) / 4; j = j + 1) begin
                 wait(!filter_fifo_full); 
                 wait_cycles(1);
                 filter = filter_mem[j];
@@ -188,8 +192,8 @@ module PE_tb();
 
     task automatic push_ipsum_data;
         begin
-            for (int k = 0; k < (LAYER_p * LAYER_n * LAYER_F) / 4; k = k + 1) begin
-                wait(!ipsum_fifo_full);
+            for (int k = 0; k < (LAYER_p * LAYER_n * LAYER_F + 3) / 4; k = k + 1) begin
+                wait(DUT.ipsum_fifo_empty);
                 wait_cycles(1);
                 ipsum = ipsum_mem[k];
                 push_ipsum = 1'b1;
@@ -202,7 +206,7 @@ module PE_tb();
 
     task automatic check_opsum_data;
         begin
-            for (int m = 0; m < (LAYER_p * LAYER_n * LAYER_F) / 4; m = m + 1) begin
+            for (int m = 0; m < (LAYER_p * LAYER_n * LAYER_F + 3) / 4; m = m + 1) begin
                 wait(!opsum_fifo_empty);
                 wait_cycles(1);
                 pop_opsum = 1'b1;
@@ -253,6 +257,7 @@ module PE_tb();
     endtask
 	
     task cfg;
+        input [W_WIDTH - 1:0] cfg_W;
         input [S_WIDTH - 1:0] cfg_S;
         input [F_WIDTH - 1:0] cfg_F;
         input [U_WIDTH - 1:0] cfg_U;
@@ -260,12 +265,12 @@ module PE_tb();
         input [p_WIDTH - 1:0] cfg_p;
         input [q_WIDTH - 1:0] cfg_q;        
         begin
-            S = cfg_S; F = cfg_F; U = cfg_U; n = cfg_n; p = cfg_p; q = cfg_q;
+            W = cfg_W; S = cfg_S; F = cfg_F; U = cfg_U; n = cfg_n; p = cfg_p; q = cfg_q;
             wait_cycles(1);
             configure = 1'b1; 
             wait_cycles(1);      
             configure = 1'b0;
-            S = 0; F = 0; U = 0; n = 0; p = 0; q = 0; 
+            W = 0; S = 0; F = 0; U = 0; n = 0; p = 0; q = 0; 
         end
     endtask
 	

@@ -39,11 +39,14 @@ module Psum_Spad
     reg [DATA_WIDTH-1:0] mem [0:MEM_DEPTH-1];
     
     // Memory write and read logic
-    always @(negedge clk) begin
+    always @(posedge clk) begin
         if (w_en) begin
             mem[w_addr] <= din;
         end
-        dout = mem[r_addr];
+    end
+    
+    always @(negedge clk) begin
+        dout <= mem[r_addr];
     end
                 
 endmodule
